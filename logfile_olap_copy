@@ -1,0 +1,50 @@
+2024-11-19 10:31:44.068 +07 [12424] LOG:  starting PostgreSQL 16.4 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.2.0-23ubuntu4) 13.2.0, 64-bit
+2024-11-19 10:31:44.068 +07 [12424] LOG:  listening on IPv4 address "127.0.0.1", port 5503
+2024-11-19 10:31:44.135 +07 [12424] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5503"
+2024-11-19 10:31:44.205 +07 [12427] LOG:  database system was interrupted while in recovery at log time 2024-11-19 10:26:47 +07
+2024-11-19 10:31:44.205 +07 [12427] HINT:  If this has occurred more than once some data might be corrupted and you might need to choose an earlier recovery target.
+2024-11-19 10:31:44.494 +07 [12427] LOG:  entering standby mode
+2024-11-19 10:31:44.494 +07 [12427] LOG:  starting backup recovery with redo LSN 0/E000028, checkpoint LSN 0/E000060, on timeline ID 1
+2024-11-19 10:31:44.550 +07 [12427] LOG:  redo starts at 0/E000028
+2024-11-19 10:31:44.579 +07 [12427] LOG:  completed backup recovery with redo LSN 0/E000028 and end LSN 0/E000100
+2024-11-19 10:31:44.579 +07 [12427] LOG:  consistent recovery state reached at 0/F000060
+2024-11-19 10:31:44.579 +07 [12427] LOG:  invalid record length at 0/F000060: expected at least 24, got 0
+2024-11-19 10:31:44.579 +07 [12424] LOG:  database system is ready to accept read-only connections
+2024-11-19 10:31:44.612 +07 [12431] LOG:  started streaming WAL from primary at 0/F000000 on timeline 1
+2024-11-19 10:36:44.305 +07 [12425] LOG:  restartpoint starting: time
+2024-11-19 10:36:46.958 +07 [12425] LOG:  restartpoint complete: wrote 25 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.425 s, sync=0.071 s, total=2.654 s; sync files=21, longest=0.036 s, average=0.004 s; distance=16384 kB, estimate=16384 kB; lsn=0/F000098, redo lsn=0/F000060
+2024-11-19 10:36:46.958 +07 [12425] LOG:  recovery restart point at 0/F000060
+2024-11-19 10:36:46.958 +07 [12425] DETAIL:  Last completed transaction was at log time 2024-11-19 10:34:03.00904+07.
+2024-11-19 10:39:09.983 +07 [12424] LOG:  could not open file "postmaster.pid": No such file or directory
+2024-11-19 10:39:09.983 +07 [12424] LOG:  performing immediate shutdown because data directory lock file is invalid
+2024-11-19 10:39:09.983 +07 [12424] LOG:  received immediate shutdown request
+2024-11-19 10:39:09.983 +07 [12424] LOG:  could not open file "postmaster.pid": No such file or directory
+2024-11-19 10:39:09.991 +07 [12424] LOG:  database system is shut down
+2024-11-19 10:39:11.754 +07 [12810] LOG:  starting PostgreSQL 16.4 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.2.0-23ubuntu4) 13.2.0, 64-bit
+2024-11-19 10:39:11.754 +07 [12810] LOG:  listening on IPv4 address "127.0.0.1", port 5503
+2024-11-19 10:39:11.821 +07 [12810] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5503"
+2024-11-19 10:39:11.891 +07 [12813] LOG:  database system was interrupted while in recovery at log time 2024-11-19 10:36:47 +07
+2024-11-19 10:39:11.891 +07 [12813] HINT:  If this has occurred more than once some data might be corrupted and you might need to choose an earlier recovery target.
+2024-11-19 10:39:12.108 +07 [12813] LOG:  entering standby mode
+2024-11-19 10:39:12.108 +07 [12813] LOG:  starting backup recovery with redo LSN 0/F017560, checkpoint LSN 0/F017598, on timeline ID 1
+2024-11-19 10:39:12.175 +07 [12813] LOG:  redo starts at 0/F017560
+2024-11-19 10:39:12.207 +07 [12813] LOG:  completed backup recovery with redo LSN 0/F017560 and end LSN 0/F017648
+2024-11-19 10:39:12.207 +07 [12813] LOG:  consistent recovery state reached at 0/F017648
+2024-11-19 10:39:12.207 +07 [12813] LOG:  invalid record length at 0/F017648: expected at least 24, got 0
+2024-11-19 10:39:12.207 +07 [12810] LOG:  database system is ready to accept read-only connections
+2024-11-19 10:39:12.243 +07 [12817] LOG:  started streaming WAL from primary at 0/F000000 on timeline 1
+2024-11-19 10:44:11.963 +07 [12811] LOG:  restartpoint starting: time
+2024-11-19 10:44:14.072 +07 [12811] LOG:  restartpoint complete: wrote 20 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.922 s, sync=0.051 s, total=2.109 s; sync files=17, longest=0.043 s, average=0.003 s; distance=87 kB, estimate=87 kB; lsn=0/F02D3B8, redo lsn=0/F02D380
+2024-11-19 10:44:14.072 +07 [12811] LOG:  recovery restart point at 0/F02D380
+2024-11-19 10:44:14.072 +07 [12811] DETAIL:  Last completed transaction was at log time 2024-11-19 10:41:27.582901+07.
+2024-11-19 11:02:09.060 +07 [12810] LOG:  received fast shutdown request
+2024-11-19 11:02:09.101 +07 [12810] LOG:  aborting any active transactions
+2024-11-19 11:02:09.101 +07 [12817] FATAL:  terminating walreceiver process due to administrator command
+2024-11-19 11:02:09.102 +07 [12811] LOG:  shutting down
+2024-11-19 11:02:09.183 +07 [12810] LOG:  database system is shut down
+2024-11-19 11:15:06.403 +07 [14091] LOG:  starting PostgreSQL 16.4 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.2.0-23ubuntu4) 13.2.0, 64-bit
+2024-11-19 11:15:06.404 +07 [14091] LOG:  could not bind IPv4 address "127.0.0.1": Address already in use
+2024-11-19 11:15:06.404 +07 [14091] HINT:  Is another postmaster already running on port 5503? If not, wait a few seconds and retry.
+2024-11-19 11:15:06.404 +07 [14091] WARNING:  could not create listen socket for "localhost"
+2024-11-19 11:15:06.404 +07 [14091] FATAL:  could not create any TCP/IP sockets
+2024-11-19 11:15:06.406 +07 [14091] LOG:  database system is shut down

@@ -1,0 +1,1 @@
+/usr/local/pgsql/bin/postgres "-D" "replica_data" "-p" "5501"
