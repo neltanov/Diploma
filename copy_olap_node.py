@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+
 import os
 import subprocess
 import time
+from xxlimited_35 import error
 
 from sqlalchemy import table
 
@@ -34,10 +37,12 @@ def copy_olap_node():
 
 def configure_olap_copy():
     run_command(f"rm -rf {PGDATA_OLAP_COPY}/standby.signal")
+    print("standby.singnal removed")
     with open(f"{PGDATA_OLAP_COPY}/postgresql.conf", "a") as conf:
         conf.write(f"\nport = {OLAP_COPY_PORT}")
+        print("port specified")
         conf.write(f"\nshared_preload_libraries=citus")
-    print("standby.signal removed, port specified and shared_preload_libraries set to citus")
+        print("shared_preload_libraries set to citus")
 
 
 def run_olap_copy():
@@ -59,9 +64,12 @@ def create_columnar_tables(relations):
 
 
 def wait_timeout(timeout):
-    print("Ready for processing analytical queries.")
-    time.sleep(timeout)
-    print("Next synchronization iteration")
+    try:
+        print("Ready for processing analytical queries.")
+        time.sleep(timeout)
+        print("Next synchronization iteration")
+    except KeyboardInterrupt as e:
+        exit(1)
 
 
 def main():

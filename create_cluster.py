@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import subprocess
 import time
@@ -49,7 +51,7 @@ def setup_primary():
 
     # Запускаем основной узел, если он еще не запущен
     if not is_server_running("localhost", PRIMARY_PORT):
-        run_command(f"pg_ctl -D {PGDATA_PRIMARY} -o '-p {PRIMARY_PORT}' -l logfile_primary start")
+        run_command(f"pg_ctl -D {PGDATA_PRIMARY} -o '-p {PRIMARY_PORT}' -l logs/logfile_primary start")
         time.sleep(2)
 
     # Создаем пользователя для репликации, если его еще не существует
@@ -79,11 +81,10 @@ def setup_replica(replica_port, replica_data_path):
     with open(f"{replica_data_path}/postgresql.conf", "a") as conf:
         conf.write(f"\nport = {replica_port}")
 
-    run_command(f"pg_ctl -D {replica_data_path} -o '-p {replica_port}' -l logfile_replica start")
+    run_command(f"pg_ctl -D {replica_data_path} -o '-p {replica_port}' -l logs/logfile_replica start")
     print("Реплика настроена и запущена.")
 
 
-# Основной процесс
 def main():
     try:
         setup_primary()
