@@ -3,16 +3,20 @@
 import os
 import subprocess
 import time
-from xxlimited_35 import error
+import argparse
+import configparser
 
-from sqlalchemy import table
 
-OLAP_PORT = 5502
-OLAP_COPY_PORT = 5503
-PGDATA_OLAP = "olap_data"
-PGDATA_OLAP_COPY = "olap_copy_data"
-REPL_USER = "replica_user"
-REPL_PASSWORD = "replica_pass"
+config = configparser.ConfigParser()
+config.read('settings.ini')
+
+OLAP_PORT = int(config['DEFAULT']['OLAP_PORT'])
+OLAP_COPY_PORT = int(config['DEFAULT']['OLAP_COPY_PORT'])
+PGDATA_OLAP = config['DEFAULT']['PGDATA_OLAP']
+PGDATA_OLAP_COPY = config['DEFAULT']['PGDATA_OLAP_COPY']
+REPL_USER = config['DEFAULT']['REPL_USER']
+REPL_PASSWORD = config['DEFAULT']['REPL_PASSWORD']
+
 
 def run_command(command):
     result = subprocess.run(command, shell=True, text=True, capture_output=True)
@@ -72,17 +76,24 @@ def wait_timeout(timeout):
         exit(1)
 
 
+def columnar_backup(table_list):
+    stop_olap_copy_if_started()
+    copy_olap_node()
+    configure_olap_copy()
+    run_olap_copy()
+    create_columnar_tables(table_list)
+
+
 def main():
     print("Olap node will be configured as soon as possible")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('table_names', nargs='*', help='Tables to analyze')
+    args = parser.parse_args()
+    table_list = args.items
     try:
         while True:
-            stop_olap_copy_if_started()
-            copy_olap_node()
-            configure_olap_copy()
-            run_olap_copy()
-            create_columnar_tables(['tt'])
+            columnar_backup(table_list)
             wait_timeout(30)
-
     except Exception as e:
         print(f"Error: {e}")
 
