@@ -16,6 +16,7 @@ PGDATA_OLAP = config['DEFAULT']['PGDATA_OLAP']
 PGDATA_OLAP_COPY = config['DEFAULT']['PGDATA_OLAP_COPY']
 REPL_USER = config['DEFAULT']['REPL_USER']
 REPL_PASSWORD = config['DEFAULT']['REPL_PASSWORD']
+RECONF_TIMEOUT = int(config['DEFAULT']['RECONF_TIMEOUT'])
 
 
 def run_command(command):
@@ -25,8 +26,10 @@ def run_command(command):
     return result.stdout
 
 
-def stop_olap_node():
-    run_command(f"pg_ctl -D {PGDATA_OLAP} stop")
+def stop_olap_copy_if_started():
+    if os.path.exists(f"{PGDATA_OLAP_COPY}/postmaster.pid"):
+        run_command(f"pg_ctl -D {PGDATA_OLAP_COPY} stop")
+        print("OLAP copy node has been stopped")
 
 
 def copy_olap_node():
@@ -34,14 +37,14 @@ def copy_olap_node():
         run_command(f"rm -rf {PGDATA_OLAP_COPY}")
     os.environ["PGPASSWORD"] = REPL_PASSWORD
     # тут вместо basebackup нужно остановить olap ноду и скопировать с помощью cp и снова запустить
-    
+
     run_command(f"pg_basebackup -h localhost -p {OLAP_PORT} -D {PGDATA_OLAP_COPY} -P -v")
     print("OLAP copy node copied from OLAP node")
 
 
 def configure_olap_copy():
     run_command(f"rm -rf {PGDATA_OLAP_COPY}/standby.signal")
-    print("standby.singnal removed")
+    print("standby.signal removed")
     with open(f"{PGDATA_OLAP_COPY}/postgresql.conf", "a") as conf:
         conf.write(f"\nport = {OLAP_COPY_PORT}")
         print("port specified")
@@ -54,34 +57,28 @@ def run_olap_copy():
     print(f"{PGDATA_OLAP_COPY} is started")
 
 
-def stop_olap_copy_if_started():
-    if os.path.exists(f"{PGDATA_OLAP_COPY}/postmaster.pid"):
-        run_command(f"pg_ctl -D {PGDATA_OLAP_COPY} stop")
-        print("OLAP copy node has been stopped")
-
-
 # подается список из таблиц
-def create_columnar_tables(relations):
+def create_columnar_tables(tables):
     run_command(f"psql -d postgres -p {OLAP_COPY_PORT} -c 'create extension citus;'")
-    for relation in relations:
-        run_command(f"psql -d postgres -p {OLAP_COPY_PORT} -c \"select alter_table_set_access_method('{relation}', 'columnar')\"")
-
-
-def wait_timeout(timeout):
-    try:
-        print("Ready for processing analytical queries.")
-        time.sleep(timeout)
-        print("Next synchronization iteration")
-    except KeyboardInterrupt as e:
-        exit(1)
+    for table in tables:
+        run_command(f"psql -d postgres -p {OLAP_COPY_PORT} -c \"select alter_table_set_access_method('{table}', 'columnar')\"")
 
 
 def columnar_backup(table_list):
-    stop_olap_copy_if_started()
-    copy_olap_node()
-    configure_olap_copy()
-    run_olap_copy()
-    create_columnar_tables(table_list)
+    try:
+        stop_olap_copy_if_started()
+        copy_olap_node()
+        configure_olap_copy()
+        run_olap_copy()
+        create_columnar_tables(table_list)
+    except KeyboardInterrupt:
+        exit(1)
+
+def wait_timeout(timeout):
+    try:
+        time.sleep(timeout)
+    except KeyboardInterrupt:
+        exit(1)
 
 
 def main():
@@ -89,11 +86,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('table_names', nargs='*', help='Tables to analyze')
     args = parser.parse_args()
-    table_list = args.items
+    table_list = args.table_names
     try:
         while True:
             columnar_backup(table_list)
-            wait_timeout(30)
+            print("Ready for processing analytical queries.")
+            wait_timeout(RECONF_TIMEOUT)
+            print("Next synchronization iteration")
     except Exception as e:
         print(f"Error: {e}")
 
