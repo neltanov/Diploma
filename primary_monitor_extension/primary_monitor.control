@@ -1,0 +1,5 @@
+# primary_monitor extension
+comment = 'primary monitor - autofailover extension'
+default_version = '1.0'
+module_pathname = '$libdir/primary_monitor'
+relocatable = false
