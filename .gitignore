@@ -1,2 +1,9 @@
 .idea
+.vscode
+dbgen_output
 logs
+*_data
+queries
+logfile_*
+users.csv
+large_events.csv

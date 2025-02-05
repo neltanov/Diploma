@@ -17,6 +17,7 @@ PGDATA_OLAP_COPY = config['DEFAULT']['PGDATA_OLAP_COPY']
 REPL_USER = config['DEFAULT']['REPL_USER']
 REPL_PASSWORD = config['DEFAULT']['REPL_PASSWORD']
 RECONF_TIMEOUT = int(config['DEFAULT']['RECONF_TIMEOUT'])
+DATABASE = config['DEFAULT']['DATABASE']
 
 
 def run_command(command):
@@ -48,7 +49,7 @@ def configure_olap_copy():
     with open(f"{PGDATA_OLAP_COPY}/postgresql.conf", "a") as conf:
         conf.write(f"\nport = {OLAP_COPY_PORT}")
         print("port specified")
-        conf.write(f"\nshared_preload_libraries=citus")
+        conf.write(f"\nshared_preload_libraries='citus,primary_monitor'")
         print("shared_preload_libraries set to citus")
 
 
@@ -57,11 +58,15 @@ def run_olap_copy():
     print(f"{PGDATA_OLAP_COPY} is started")
 
 
-# подается список из таблиц
-def create_columnar_tables(tables):
-    run_command(f"psql -d postgres -p {OLAP_COPY_PORT} -c 'create extension citus;'")
+def remove_foreign_keys_if_exist_from_tables(tables):
     for table in tables:
-        run_command(f"psql -d postgres -p {OLAP_COPY_PORT} -c \"select alter_table_set_access_method('{table}', 'columnar')\"")
+        run_command() # <----- сюда нужно записать процедуру, удаляющую внешние ключи столбцов таблицы
+
+
+def create_columnar_tables(tables):
+    run_command(f"psql -d {DATABASE} -p {OLAP_COPY_PORT} -c 'create extension citus;'")
+    for table in tables:
+        run_command(f"psql -d {DATABASE} -p {OLAP_COPY_PORT} -c \"select alter_table_set_access_method('{table}', 'columnar')\"")
 
 
 def columnar_backup(table_list):
@@ -70,6 +75,8 @@ def columnar_backup(table_list):
         copy_olap_node()
         configure_olap_copy()
         run_olap_copy()
+        # убрать внешние ключи с таблиц
+        remove_foreign_keys_if_exist_from_tables(table_list)
         create_columnar_tables(table_list)
     except KeyboardInterrupt:
         exit(1)

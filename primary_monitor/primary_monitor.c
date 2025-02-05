@@ -54,6 +54,8 @@ GetPrimaryConninfo(void)
 static bool
 CheckPrimaryStatus(const char *primary_conninfo)
 {
+    PGresult *res;
+    bool is_primary_alive;
     PGconn *conn = PQconnectdb(primary_conninfo);
 
     if (PQstatus(conn) != CONNECTION_OK)
@@ -62,8 +64,8 @@ CheckPrimaryStatus(const char *primary_conninfo)
         return false;
     }
 
-    PGresult *res = PQexec(conn, "SELECT 1");
-    bool is_primary_alive = (PQresultStatus(res) == PGRES_TUPLES_OK);
+    res = PQexec(conn, "SELECT 1");
+    is_primary_alive = (PQresultStatus(res) == PGRES_TUPLES_OK);
 
     PQclear(res);
     PQfinish(conn);
@@ -75,6 +77,7 @@ CheckPrimaryStatus(const char *primary_conninfo)
 static void
 PerformFailover(void)
 {
+    PGresult *res;
     PGconn *conn = PQconnectdb(replica_conninfo);
 
     if (PQstatus(conn) != CONNECTION_OK)
@@ -84,7 +87,7 @@ PerformFailover(void)
         return;
     }
 
-    PGresult *res = PQexec(conn, "SELECT pg_promote()");
+    res = PQexec(conn, "SELECT pg_promote()");
 
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
         elog(WARNING, "Failover: Could not promote replica to primary");
@@ -122,21 +125,22 @@ MonitorPrimaryWorker(Datum main_arg)
     elog(LOG, "Failover extension: Background worker shutting down");
 }
 
-/* Initialize the extension */
+
 void
 _PG_init(void)
 {
     BackgroundWorker worker;
 
     memset(&worker, 0, sizeof(worker));
-    strcpy_s(worker.bgw_name, sizeof(worker.bgw_name),
-			 "Primary Monitor Worker");
+    sprintf(worker.bgw_name, "Primary Monitor Worker");
     worker.bgw_flags = BGWORKER_SHMEM_ACCESS | BGWORKER_BACKEND_DATABASE_CONNECTION;
     
     worker.bgw_start_time = BgWorkerStart_ConsistentState;
     
     worker.bgw_restart_time = 1;
-    strcpy_s(worker.bgw_function_name, sizeof(worker.bgw_library_name),
+
+    sprintf(worker.bgw_library_name, "primary_monitor");
+    sprintf(worker.bgw_function_name,
 			 "MonitorPrimaryWorker");
     
     worker.bgw_main_arg = (Datum) 0;
